@@ -1,0 +1,27 @@
+Arguments: 
+  /home/carredo/.nvm/versions/node/v16.14.2/bin/node /home/carredo/.yarn/bin/yarn.js add --dev hardhat
+
+PATH: 
+  /home/carredo/.yarn/bin:/home/carredo/.config/yarn/global/node_modules/.bin:/home/carredo/.vscode-server/bin/92da9481c0904c6adfe372c12da3b7748d74bdcb/bin/remote-cli:/home/carredo/.yarn/bin:/home/carredo/.config/yarn/global/node_modules/.bin:/home/carredo/.nvm/versions/node/v16.14.2/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/lib/wsl/lib:/mnt/c/Python311/Scripts/:/mnt/c/Python311/:/mnt/c/Program Files/Common Files/Oracle/Java/javapath:/mnt/c/Program Files (x86)/Common Files/Oracle/Java/javapath:/mnt/c/windows/system32:/mnt/c/windows:/mnt/c/windows/System32/Wbem:/mnt/c/windows/System32/WindowsPowerShell/v1.0/:/mnt/c/windows/System32/OpenSSH/:/mnt/c/Program Files/SafeNet/Authentication/SAC/x64:/mnt/c/Program Files/SafeNet/Authentication/SAC/x32:/mnt/c/ProgramData/chocolatey/bin:/mnt/c/ProgramData/chocolatey/lib/maven/apache-maven-3.8.6/bin:/mnt/c/ProgramData/nvm:/mnt/c/Program Files/nodejs:/mnt/c/Program Files/dotnet/:/mnt/c/Program Files/Docker/Docker/resources/bin:/mnt/c/Program Files/Git/cmd:/mnt/c/Program Files/GitHub CLI/:/mnt/c/Users/carredo/AppData/Local/Microsoft/WindowsApps:/mnt/c/Users/carredo/AppData/Local/JetBrains/Toolbox/scripts:/mnt/c/Users/carredo/AppData/Roaming/npm:/mnt/c/ProgramData/nvm:/mnt/c/Program Files/nodejs:/mnt/c/Users/carredo/AppData/Local/Programs/Microsoft VS Code/bin:/mnt/c/Program Files/JetBrains/IntelliJ IDEA 2022.2.3/bin:/snap/bin
+
+Yarn version: 
+  1.22.19
+
+Node version: 
+  16.14.2
+
+Platform: 
+  linux x64
+
+Trace: 
+  Error: getaddrinfo EAI_AGAIN registry.yarnpkg.com
+      at GetAddrInfoReqWrap.onlookup [as oncomplete] (node:dns:71:26)
+
+npm manifest: 
+  No manifest
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile

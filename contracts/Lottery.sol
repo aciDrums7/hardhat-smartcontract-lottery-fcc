@@ -17,7 +17,6 @@ error Lottery__TransferFailed();
 error Lottery__NotOpen();
 
 contract Lottery is VRFConsumerBaseV2, AutomationCompatible {
-
     /* Type declarations */
     enum LotteryState {
         OPEN,
@@ -38,6 +37,8 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatible {
     address private s_recentWinner;
     /* uint256 private s_state; // pending, open, closed, calculaing... */
     LotteryState private s_lotteryState;
+    uint256 private s_lastTimeStamp;
+    uint256 private immutable i_timeInterval;
 
     /* Events */
     event LotteryEnter(address indexed player);
@@ -49,7 +50,8 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatible {
         uint256 entranceFee,
         bytes32 gasLane,
         uint64 subscriptionId,
-        uint32 callbackGasLimit
+        uint32 callbackGasLimit,
+        uint256 timeInterval
     ) VRFConsumerBaseV2(vrfCoordinatorV2) {
         i_entranceFee = entranceFee;
         i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2);
@@ -57,6 +59,8 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatible {
         i_subscriptionId = subscriptionId;
         i_callbackGasLimit = callbackGasLimit;
         s_lotteryState = LotteryState.OPEN;
+        s_lastTimeStamp = block.timestamp;
+        i_timeInterval = timeInterval;
     }
 
     function enterLottery() public payable {
@@ -64,7 +68,7 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatible {
         if (msg.value < i_entranceFee) {
             revert Lottery__NotEnoughETHEntered();
         }
-        if(s_lotteryState != LotteryState.OPEN) {
+        if (s_lotteryState != LotteryState.OPEN) {
             revert Lottery__NotOpen();
         }
         s_players.push(payable(msg.sender));
@@ -80,11 +84,18 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatible {
      * 1. Our time interval should have passed
      * 2. The lottery should have at least 1 player, and have some ETH
      * 3. Our subscription is funded with LINK
-     * 4. The lottery should be in an "open" state.  
+     * 4. The lottery should be in an "open" state.
      */
     function checkUpkeep(
         bytes calldata /* checkData */
-    ) external view override returns (bool upkeepNeeded, bytes memory /* performData */) {}
+    ) external view override returns (bool upkeepNeeded, bytes memory /* performData */) {
+        // (block.timestamp - last block timestamp) > interval
+        bool timePassed = ((block.timestamp - s_lastTimeStamp) > i_timeInterval);
+        bool hasPlayers = (s_players.length > 0);
+        bool hasBalance = address(this).balance > 0;
+        bool isOpen = (s_lotteryState == LotteryState.OPEN);
+        upkeepNeeded = (isOpen && timePassed && hasPlayers && hasBalance);
+    }
 
     function requestRandomWinner() external {
         // Request the random number
@@ -112,6 +123,7 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatible {
         address payable recentWinner = s_players[indexOfWinner];
         s_recentWinner = recentWinner;
         s_lotteryState = LotteryState.OPEN;
+        s_players = new address payable[](0);
         (bool success, ) = recentWinner.call{value: address(this).balance}("");
         // require("success")
         if (!success) {

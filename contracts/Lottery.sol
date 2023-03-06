@@ -14,8 +14,16 @@ import "@chainlink/contracts/src/v0.8/AutomationCompatible.sol";
 
 error Lottery__NotEnoughETHEntered();
 error Lottery__TransferFailed();
+error Lottery__NotOpen();
 
 contract Lottery is VRFConsumerBaseV2, AutomationCompatible {
+
+    /* Type declarations */
+    enum LotteryState {
+        OPEN,
+        CALCULATING
+    } // uint256 0 = OPEN, 1 = CALCULATING
+
     /* State Variables */
     uint256 private immutable i_entranceFee;
     address payable[] private s_players;
@@ -28,6 +36,8 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatible {
 
     /* Lottery Variables */
     address private s_recentWinner;
+    /* uint256 private s_state; // pending, open, closed, calculaing... */
+    LotteryState private s_lotteryState;
 
     /* Events */
     event LotteryEnter(address indexed player);
@@ -46,12 +56,16 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatible {
         i_gasLane = gasLane;
         i_subscriptionId = subscriptionId;
         i_callbackGasLimit = callbackGasLimit;
+        s_lotteryState = LotteryState.OPEN;
     }
 
     function enterLottery() public payable {
         // require(msg.value > i_entranceFee, "Not enough ETH!")
         if (msg.value < i_entranceFee) {
             revert Lottery__NotEnoughETHEntered();
+        }
+        if(s_lotteryState != LotteryState.OPEN) {
+            revert Lottery__NotOpen();
         }
         s_players.push(payable(msg.sender));
         // Emit an event when we update a dynamic array or mapping
@@ -76,6 +90,7 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatible {
         // Request the random number
         // One we get it, do something with it
         // 2 transaction process
+        s_lotteryState = LotteryState.CALCULATING;
         uint256 requestId = i_vrfCoordinator.requestRandomWords(
             i_gasLane, //gasLane
             i_subscriptionId,
@@ -96,6 +111,7 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatible {
         uint256 indexOfWinner = randomWords[0] % s_players.length;
         address payable recentWinner = s_players[indexOfWinner];
         s_recentWinner = recentWinner;
+        s_lotteryState = LotteryState.OPEN;
         (bool success, ) = recentWinner.call{value: address(this).balance}("");
         // require("success")
         if (!success) {

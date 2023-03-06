@@ -70,7 +70,13 @@ contract Lottery is VRFConsumerBaseV2 {
     function fulfillRandomWords(
         uint256 requestId,
         uint256[] memory randomWords
-    ) internal override {}
+    ) internal override {
+        // s_players size 10
+        // randomNumber 202
+        // 202 % 10
+        uint256 indexOfWinner = randomWords[0] % s_players.length;
+        address payable recentWinner = s_players[indexOfWinner];
+    }
 
     /* View / Pure functions */
     function getEntranceFee() public view returns (uint256) {

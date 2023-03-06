@@ -10,11 +10,12 @@ pragma solidity 0.8.18;
 
 import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
+import "@chainlink/contracts/src/v0.8/AutomationCompatible.sol";
 
 error Lottery__NotEnoughETHEntered();
 error Lottery__TransferFailed();
 
-contract Lottery is VRFConsumerBaseV2 {
+contract Lottery is VRFConsumerBaseV2, AutomationCompatible {
     /* State Variables */
     uint256 private immutable i_entranceFee;
     address payable[] private s_players;
@@ -57,6 +58,19 @@ contract Lottery is VRFConsumerBaseV2 {
         // Named events with the function name reversed
         emit LotteryEnter(msg.sender);
     }
+
+    /**
+     * @dev This is the function that the Chainlink Keeper nodes call
+     * they look for the `upkeepNeeded` to return true
+     * The following should be true in order to return upkeepNeeded == true:
+     * 1. Our time interval should have passed
+     * 2. The lottery should have at least 1 player, and have some ETH
+     * 3. Our subscription is funded with LINK
+     * 4. The lottery should be in an "open" state.  
+     */
+    function checkUpkeep(
+        bytes calldata /* checkData */
+    ) external view override returns (bool upkeepNeeded, bytes memory /* performData */) {}
 
     function requestRandomWinner() external {
         // Request the random number

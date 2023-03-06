@@ -15,6 +15,7 @@ import "@chainlink/contracts/src/v0.8/AutomationCompatible.sol";
 error Lottery__NotEnoughETHEntered();
 error Lottery__TransferFailed();
 error Lottery__NotOpen();
+error Lottery__UpkeepNotNeeded(uint256 currentBalance, uint256 numPlayers, uint256 lotteryState);
 
 contract Lottery is VRFConsumerBaseV2, AutomationCompatible {
     /* Type declarations */
@@ -88,20 +89,28 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatible {
      */
     function checkUpkeep(
         bytes calldata /* checkData */
-    ) external view override returns (bool upkeepNeeded, bytes memory /* performData */) {
+    ) public view override returns (bool upkeepNeeded, bytes memory /* performData */) {
         // (block.timestamp - last block timestamp) > interval
         bool timePassed = ((block.timestamp - s_lastTimeStamp) > i_timeInterval);
         bool hasPlayers = (s_players.length > 0);
         bool hasBalance = address(this).balance > 0;
         bool isOpen = (s_lotteryState == LotteryState.OPEN);
-        upkeepNeeded = (isOpen && timePassed && hasPlayers && hasBalance);
+        /* return */ upkeepNeeded = (isOpen && timePassed && hasPlayers && hasBalance);
     }
 
-    function requestRandomWinner() external {
+    function performUpkeep(bytes calldata /* performData */) external override {
         // Request the random number
         // One we get it, do something with it
         // 2 transaction process
         s_lotteryState = LotteryState.CALCULATING;
+        (bool upkeepNeeded, ) = checkUpkeep("");
+        if (!upkeepNeeded) {
+            revert Lottery__UpkeepNotNeeded(
+                address(this).balance,
+                s_players.length,
+                uint256(s_lotteryState)
+            );
+        }
         uint256 requestId = i_vrfCoordinator.requestRandomWords(
             i_gasLane, //gasLane
             i_subscriptionId,
@@ -124,6 +133,7 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatible {
         s_recentWinner = recentWinner;
         s_lotteryState = LotteryState.OPEN;
         s_players = new address payable[](0);
+        s_lastTimeStamp = block.timestamp;
         (bool success, ) = recentWinner.call{value: address(this).balance}("");
         // require("success")
         if (!success) {

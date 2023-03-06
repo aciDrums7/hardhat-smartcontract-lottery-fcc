@@ -1,7 +1,7 @@
-// Lottery
-// Enter the lottery (paying some amount)
-// Winner to be selected every X minutes -> completely automated
-// Chainlink Oracle -> Randomness, Automated Execution (Chainlink Keepers)
+/* Lottery
+Enter the lottery (paying some amount)
+Winner to be selected every X minutes -> completely automated
+Chainlink Oracle -> Randomness, Automated Execution (Chainlink Keepers) */
 
 // https://docs.chain.link/vrf/v2/subscription/examples/get-a-random-number
 
@@ -17,6 +17,12 @@ error Lottery__TransferFailed();
 error Lottery__NotOpen();
 error Lottery__UpkeepNotNeeded(uint256 currentBalance, uint256 numPlayers, uint256 lotteryState);
 
+/**
+ * @title A sample Lottery Contract
+ * @author Edoardo Carradori
+ * @notice This contract is for creating an untamperable decentralized smart contract
+ * @dev This implements Chainlink VRF v2 and Chainlink Keepers
+ */
 contract Lottery is VRFConsumerBaseV2, AutomationCompatible {
     /* Type declarations */
     enum LotteryState {
@@ -45,6 +51,8 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatible {
     event LotteryEnter(address indexed player);
     event RequestedLotteryWinner(uint256 indexed requestId);
     event WinnerPicked(address indexed winnerPicked);
+
+    /* Functions */
 
     constructor(
         address vrfCoordinatorV2,
@@ -88,7 +96,7 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatible {
      * 4. The lottery should be in an "open" state.
      */
     function checkUpkeep(
-        bytes calldata /* checkData */
+        bytes memory /* checkData */
     ) public view override returns (bool upkeepNeeded, bytes memory /* performData */) {
         // (block.timestamp - last block timestamp) > interval
         bool timePassed = ((block.timestamp - s_lastTimeStamp) > i_timeInterval);
@@ -153,5 +161,25 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatible {
 
     function getRecentWinner() public view returns (address) {
         return s_recentWinner;
+    }
+
+    function getLotteryState() public view returns (LotteryState) {
+        return s_lotteryState;
+    }
+
+    function getNumWords() public pure returns (uint256) {
+        return NUM_WORDS;
+    }
+
+    function getNumberOfPlayers() public view returns (uint256) {
+        return s_players.length;
+    }
+
+    function getLatestTimeStamp() public view returns (uint256) {
+        return s_lastTimeStamp;
+    }
+
+    function getRequestConfirmations() public pure returns (uint256) {
+        return REQUEST_CONFIRMATIONS;
     }
 }

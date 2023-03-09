@@ -60,7 +60,7 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatible {
         bytes32 gasLane,
         uint64 subscriptionId,
         uint32 callbackGasLimit,
-        uint256 timeInterval
+        uint256 interval
     ) VRFConsumerBaseV2(vrfCoordinatorV2) {
         i_entranceFee = entranceFee;
         i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2);
@@ -69,7 +69,7 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatible {
         i_callbackGasLimit = callbackGasLimit;
         s_lotteryState = LotteryState.OPEN;
         s_lastTimeStamp = block.timestamp;
-        i_timeInterval = timeInterval;
+        i_timeInterval = interval;
     }
 
     function enterLottery() public payable {
@@ -155,7 +155,7 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatible {
         return i_entranceFee;
     }
 
-    function getPlayers(uint256 index) public view returns (address) {
+    function getPlayer(uint256 index) public view returns (address) {
         return s_players[index];
     }
 
@@ -181,5 +181,9 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatible {
 
     function getRequestConfirmations() public pure returns (uint256) {
         return REQUEST_CONFIRMATIONS;
+    }
+
+    function getInterval() public view returns (uint256) {
+        return i_timeInterval;
     }
 }

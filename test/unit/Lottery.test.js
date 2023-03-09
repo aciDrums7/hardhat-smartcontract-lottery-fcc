@@ -43,5 +43,8 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
                       "LotteryEnter"
                   )
               })
+              it("doesn't allow entrance when lottery is calculating", async () => {
+                await lottery.enterLottery({ value: lotteryEntranceFee })
+              })
           })
       })

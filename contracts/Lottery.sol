@@ -126,6 +126,7 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatible {
             uint32(i_callbackGasLimit),
             NUM_WORDS
         );
+        // This is redundant!!! The vrfCoordinator already emits an event with the requestId
         emit RequestedLotteryWinner(requestId);
     }
 

@@ -1,4 +1,4 @@
-const { assert, expect } = require("chai")
+const { assert, expect, AssertionError } = require("chai")
 const { deployments, getNamedAccounts, ethers, network } = require("hardhat")
 const { developmentChains, networkConfig } = require("../../helper-hardhat-config")
 
@@ -17,7 +17,7 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
               interval = await lottery.getInterval()
           })
 
-          describe("constructor", async () => {
+          describe("constructor", () => {
               it("initializes the lottery correctly", async () => {
                   // Ideally we make our tests have just 1 assert per "it"
                   const lotteryState = await lottery.getLotteryState()
@@ -26,7 +26,7 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
               })
           })
 
-          describe("enterLottery", async () => {
+          describe("enterLottery", () => {
               it("reverts when you don't pay enough", async () => {
                   await expect(lottery.enterLottery()).to.be.revertedWith(
                       "Lottery__NotEnoughETHEntered"
@@ -57,7 +57,7 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
               })
           })
 
-          describe("checkUpkeed", async () => {
+          describe("checkUpkeed", () => {
               it("returns false if people haven't send any ETH", async () => {
                   await network.provider.send("evm_increaseTime", [interval.toNumber() + 1])
                   await network.provider.send("evm_mine", [])
@@ -66,6 +66,56 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
                   // * It's quite like mocking the method call!
                   const { upkeedNeeded } = await lottery.callStatic.checkUpkeep([])
                   assert(!upkeedNeeded)
+              })
+              it("returns false if lottery isn't open", async () => {
+                  await lottery.enterLottery({ value: lotteryEntranceFee })
+                  await network.provider.send("evm_increaseTime", [interval.toNumber() + 1])
+                  await network.provider.send("evm_mine", [])
+                  await lottery.performUpkeep("0x")
+                  const lotteryState = await lottery.getLotteryState()
+                  const { upkeepNeeded } = await lottery.callStatic.checkUpkeep([])
+                  assert.equal(lotteryState.toString(), "1")
+                  assert.equal(upkeepNeeded, false)
+              })
+              it("returns false if enough time hasn't passed", async () => {
+                  await lottery.enterLottery({ value: lotteryEntranceFee })
+                  await network.provider.send("evm_increaseTime", [interval.toNumber() - 1])
+                  await network.provider.request({ method: "evm_mine", params: [] })
+                  const { upkeepNeeded } = await lottery.callStatic.checkUpkeep("0x")
+                  assert(!upkeepNeeded)
+              })
+              it("returns true if enough time has passed, has players, eth, and is open", async () => {
+                  await lottery.enterLottery({ value: lotteryEntranceFee })
+                  await network.provider.send("evm_increaseTime", [interval.toNumber() + 1])
+                  await network.provider.request({ method: "evm_mine", params: [] })
+                  const { upkeepNeeded } = await lottery.callStatic.checkUpkeep("0x")
+                  assert(upkeepNeeded)
+              })
+          })
+
+          describe("performUpkeep", () => {
+              it("can only run if checkUpkeed returns true", async () => {
+                  await lottery.enterLottery({ value: lotteryEntranceFee })
+                  await network.provider.send("evm_increaseTime", [interval.toNumber() + 1])
+                  await network.provider.send("evm_mine", [])
+                  const transaction = await lottery.performUpkeep("0x")
+                  assert(transaction)
+              })
+              it("reverts when checkUpkeep returns false", async () => {
+                  await expect(lottery.performUpkeep("0x")).to.be.revertedWith(
+                      "Lottery__UpkeepNotNeeded"
+                  )
+              })
+              it("updated the lottery state, emits an event and calls the vrf coordinator", async () => {
+                  await lottery.enterLottery({ value: lotteryEntranceFee })
+                  await network.provider.send("evm_increaseTime", [interval.toNumber() + 1])
+                  await network.provider.send("evm_mine", [])
+                  const transactionRespone = await lottery.performUpkeep("0x")
+                  const transactionReceipt = await transactionRespone.wait(1)
+                  const requestId = transactionReceipt.events[1].args.requestId
+                  const lotteryState = await lottery.getLotteryState()
+                  assert(requestId.toNumber() > 0)
+                  assert(lotteryState.toString() == "1")
               })
           })
       })

@@ -37,5 +37,11 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
                   const playerFromContract = await lottery.getPlayer(0)
                   assert.equal(playerFromContract.toString(), deployer)
               })
+              it("emits event on enter", async () => {
+                  await expect(lottery.enterLottery({ value: lotteryEntranceFee })).to.emit(
+                      lottery,
+                      "LotteryEnter"
+                  )
+              })
           })
       })

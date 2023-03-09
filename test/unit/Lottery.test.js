@@ -57,10 +57,15 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
               })
           })
 
-          descirbe("checkUpkeed", async () => {
-            it("returns false if people haven't send any ETH", async () => {
-                await network.provider.send("evm_increaseTime", [interval.toNumber() + 1])
-                await network.provider.send("evm_mine", [])
-            })
+          describe("checkUpkeed", async () => {
+              it("returns false if people haven't send any ETH", async () => {
+                  await network.provider.send("evm_increaseTime", [interval.toNumber() + 1])
+                  await network.provider.send("evm_mine", [])
+                  // * Since checkUpkeep isn't a view/pure function, when we call it a transaction would be initilized
+                  // * To avoid this for testing purposes, we can use 'callStatic' to just have the return of the method
+                  // * It's quite like mocking the method call!
+                  const { upkeedNeeded } = await lottery.callStatic.checkUpkeep([])
+                  assert(!upkeedNeeded)
+              })
           })
       })

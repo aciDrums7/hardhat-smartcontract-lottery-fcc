@@ -110,7 +110,6 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatible {
         // Request the random number
         // One we get it, do something with it
         // 2 transaction process
-        s_lotteryState = LotteryState.CALCULATING;
         (bool upkeepNeeded, ) = checkUpkeep("");
         if (!upkeepNeeded) {
             revert Lottery__UpkeepNotNeeded(
@@ -119,11 +118,12 @@ contract Lottery is VRFConsumerBaseV2, AutomationCompatible {
                 uint256(s_lotteryState)
             );
         }
+        s_lotteryState = LotteryState.CALCULATING;
         uint256 requestId = i_vrfCoordinator.requestRandomWords(
             i_gasLane, //gasLane
             i_subscriptionId,
             REQUEST_CONFIRMATIONS,
-            i_callbackGasLimit,
+            uint32(i_callbackGasLimit),
             NUM_WORDS
         );
         emit RequestedLotteryWinner(requestId);

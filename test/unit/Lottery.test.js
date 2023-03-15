@@ -61,9 +61,9 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
               it("returns false if people haven't send any ETH", async () => {
                   await network.provider.send("evm_increaseTime", [interval.toNumber() + 1])
                   await network.provider.send("evm_mine", [])
-                  // * Since checkUpkeep isn't a view/pure function, when we call it a transaction would be initilized
-                  // * To avoid this for testing purposes, we can use 'callStatic' to just have the return of the method
-                  // * It's quite like mocking the method call!
+                  // ! Since checkUpkeep isn't a view/pure function, when we call it a transaction would be initilized
+                  // ! It would be a problem (?) for testing purposes, so we can use 'callStatic' to just have the return of the method
+                  // ! It's quite like mocking the method call!
                   const { upkeedNeeded } = await lottery.callStatic.checkUpkeep([])
                   assert(!upkeedNeeded)
               })
@@ -110,12 +110,28 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
                   await lottery.enterLottery({ value: lotteryEntranceFee })
                   await network.provider.send("evm_increaseTime", [interval.toNumber() + 1])
                   await network.provider.send("evm_mine", [])
-                  const transactionRespone = await lottery.performUpkeep("0x")
-                  const transactionReceipt = await transactionRespone.wait(1)
-                  const requestId = transactionReceipt.events[1].args.requestId
+                  const txResponse = await lottery.performUpkeep("0x")
+                  const txReceipt = await txResponse.wait(1)
+                  const requestId = txReceipt.events[1].args.requestId
                   const lotteryState = await lottery.getLotteryState()
                   assert(requestId.toNumber() > 0)
                   assert(lotteryState.toString() == "1")
+              })
+          })
+
+          describe("fullfillRandomWords", () => {
+              beforeEach(async () => {
+                  await lottery.enterLottery({ value: lotteryEntranceFee })
+                  await network.provider.send("evm_increaseTime", [interval.toNumber() + 1])
+                  await network.provider.send("evm_mine", [])
+              })
+              it("can only be called after performUpkeep", async () => {
+                  await expect(
+                      vrfCoordinatorV2Mock.fulfillRandomWords(0, lottery.address)
+                  ).to.be.revertedWith("nonexistent request")
+                  await expect(
+                      vrfCoordinatorV2Mock.fulfillRandomWords(1, lottery.address)
+                  ).to.be.revertedWith("nonexistent request")
               })
           })
       })

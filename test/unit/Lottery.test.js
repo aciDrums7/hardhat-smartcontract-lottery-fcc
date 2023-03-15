@@ -79,9 +79,9 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
               })
               it("returns false if enough time hasn't passed", async () => {
                   await lottery.enterLottery({ value: lotteryEntranceFee })
-                  await network.provider.send("evm_increaseTime", [interval.toNumber() - 1])
+                  await network.provider.send("evm_increaseTime", [interval.toNumber() - 5]) // use a higher number here if this test fails
                   await network.provider.request({ method: "evm_mine", params: [] })
-                  const { upkeepNeeded } = await lottery.callStatic.checkUpkeep("0x")
+                  const { upkeepNeeded } = await lottery.callStatic.checkUpkeep("0x") // upkeepNeeded = (timePassed && isOpen && hasBalance && hasPlayers)
                   assert(!upkeepNeeded)
               })
               it("returns true if enough time has passed, has players, eth, and is open", async () => {

@@ -14,18 +14,7 @@
 	  "vscode": {
 		"settings": {},
 		"extensions": [
-		  "aliariff.auto-add-brackets",
-		  "steoates.autoimport",
-		  "NuclleaR.vscode-extension-auto-import",
-		  "KevinGhadyani.vscode-colormate",
-		  "dbaeumer.vscode-eslint",
-		  "VisualStudioExptTeam.vscodeintellicode",
-		  "christian-kohler.npm-intellisense",
-		  "christian-kohler.path-intellisense",
-		  "esbenp.prettier-vscode",
-		  "NomicFoundation.hardhat-solidity",
-		  "TabNine.tabnine-vscode",
-		  "kisstkondoros.typelens"
+			"NomicFoundation.hardhat-solidity"
 		]
 	  }
 	},

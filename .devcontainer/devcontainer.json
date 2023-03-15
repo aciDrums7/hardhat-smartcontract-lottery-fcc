@@ -14,7 +14,16 @@
 	  "vscode": {
 		"settings": {},
 		"extensions": [
-			"NomicFoundation.hardhat-solidity"
+			"NomicFoundation.hardhat-solidity",
+			"KevinGhadyani.vscode-colormate",
+			"VisualStudioExptTeam.vscodeintellicode",
+			"eamodio.gitlens",
+			"ritwickdey.LiveServer",
+			"christian-kohler.npm-intellisense",
+			"christian-kohler.path-intellisense",
+			"esbenp.prettier-vscode",
+			"TabNine.tabnine-vscode",
+			"kisstkondoros.typelens"
 		]
 	  }
 	},

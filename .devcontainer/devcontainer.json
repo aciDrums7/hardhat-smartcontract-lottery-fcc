@@ -1,0 +1,35 @@
+{
+    "name": "Hardhat Smart Contract Lottery fCC",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "args": {
+            "NODE_VERSION": "18"
+        }
+    },
+    "forwardPorts": [4200],
+    "customizations": {
+        "vscode": {
+            "extensions": [
+				"ms-vscode-remote.remote-containers",
+				"KevinGhadyani.vscode-colormate",
+				"usernamehw.errorlens",
+				"dbaeumer.vscode-eslint",
+				"NomicFoundation.hardhat-solidity",
+				"TabNine.tabnine-vscode",
+				"steoates.autoimport",
+				"aliariff.auto-add-brackets",
+				"aaron-bond.better-comments",
+				"alefragnani.Bookmarks",
+				"eamodio.gitlens",
+				"ritwickdey.LiveServer",
+				"PKief.material-icon-theme",
+				"christian-kohler.npm-intellisense",
+				"zhuangtongfa.material-theme",
+				"christian-kohler.path-intellisense",
+				"johnpapa.vscode-peacock",
+				"esbenp.prettier-vscode",
+				"kisstkondoros.typelens"
+			]
+        }
+    }
+}

@@ -47,7 +47,7 @@ module.exports = {
         // coinmarketcap: process.env.COINMARKETCAP_API_KEY,
     },
     mocha: {
-        timeout: 70000000, // 70000 seconds max
+        timeout: 200000, // 200 seconds max
     },
     etherscan: {
         // yarn hardhat verify --network <NETWORK> <CONTRACT_ADDRESS> <CONSTRUCTOR_PARAMETERS>

@@ -146,7 +146,7 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
                       const accountConnectedLottery = lottery.connect(accounts[i])
                       await accountConnectedLottery.enterLottery({ value: lotteryEntranceFee })
                   }
-                  const startingTimeStamp = await lottery.getLastTimeStamp()
+                  const startingTimeStamp = await lottery.getLatestTimeStamp()
 
                   // performUpkeep() (mock being chainlink keepers)
                   // fulfillRandomWords (mock being the Chainlink VRF)
@@ -156,18 +156,25 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
                       lottery.once("WinnerPicked", async () => {
                           console.log("Found the event!")
                           try {
-                            console.log(recentWinner)
-                            console.log(accounts[2])
-                            console.log(accounts[0])
-                            console.log(accounts[1])
-                            console.log(accounts[3])
-                            const recentWinner = await lottery.getRecentWinner()
-                            const lotteryState = await lottery.getLotteryState()
-                            const endingTimeStamp = await lottery.getLastTimeStamp()
-                            const numPlayers = await lottery.getNumberOfPlayers()
-                            assert.equal(numPlayers.toString(), "0")
-                            assert.equal(raffleState.toString(), "0")
-                            assert(endingTimeStamp > startingTimeStamp)
+                              const recentWinner = await lottery.getRecentWinner()
+                              const lotteryState = await lottery.getLotteryState()
+                              const endingTimeStamp = await lottery.getLatestTimeStamp()
+                              const numPlayers = await lottery.getNumberOfPlayers()
+                              const winnerEndingBalance = await accounts[1].getBalance()
+                              assert.equal(numPlayers.toString(), "0")
+                              assert.equal(lotteryState.toString(), "0")
+                              assert(endingTimeStamp > startingTimeStamp)
+
+                              assert.equal(
+                                  winnerEndingBalance.toString(),
+                                  // All the money added to the contract
+                                  winnerStartingBalance.add(
+                                      lotteryEntranceFee
+                                          .mul(additionalEntrants)
+                                          .add(lotteryEntranceFee)
+                                          .toString()
+                                  )
+                              )
                           } catch (error) {
                               // added in hardhat.config the mocha{timeout:200000} param -> if not resolved in 200s
                               // the promise will be considered rejected
@@ -178,6 +185,7 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
                       // below, we will fire the event, and the listener will pick it up, and resolve
                       const tx = await lottery.performUpkeep("0x")
                       const txReceipt = await tx.wait(1)
+                      const winnerStartingBalance = await accounts[1].getBalance()
                       // This function should emit "WinnerPicked" event, and resolve the promise
                       await vrfCoordinatorV2Mock.fulfillRandomWords(
                           txReceipt.events[1].args.requestId,

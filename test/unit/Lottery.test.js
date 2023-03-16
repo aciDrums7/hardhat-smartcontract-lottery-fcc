@@ -164,7 +164,6 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
                               assert.equal(numPlayers.toString(), "0")
                               assert.equal(lotteryState.toString(), "0")
                               assert(endingTimeStamp > startingTimeStamp)
-
                               assert.equal(
                                   winnerEndingBalance.toString(),
                                   // All the money added to the contract
@@ -175,12 +174,12 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
                                           .toString()
                                   )
                               )
+                              resolve()
                           } catch (error) {
                               // added in hardhat.config the mocha{timeout:200000} param -> if not resolved in 200s
                               // the promise will be considered rejected
                               reject(error)
                           }
-                          resolve()
                       })
                       // below, we will fire the event, and the listener will pick it up, and resolve
                       const tx = await lottery.performUpkeep("0x")

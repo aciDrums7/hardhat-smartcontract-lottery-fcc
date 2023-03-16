@@ -1,5 +1,6 @@
 const { network } = require("hardhat")
-const { developmentChains, networkConfig } = require("../helper-hardhat-config")
+const { developmentChains, networkConfig } = require("../helper-hardhat-config.js")
+const {verify} = require("../utils/verify")
 
 const VRF_SUB_FUND_AMOUNT = ethers.utils.parseEther("30")
 
@@ -19,8 +20,8 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
         // Usually, you'd need the link token on a real network
         await vrfCoordinatorV2Mock.fundSubscription(subscriptionId, VRF_SUB_FUND_AMOUNT)
     } else {
-        vrfCoordinatorV2Address = network[chainId]["vrfCoordinatorV2"]
-        subscriptionId = network[chainId]["subscriptionId"]
+        vrfCoordinatorV2Address = networkConfig[chainId]["vrfCoordinatorV2"]
+        subscriptionId = networkConfig[chainId]["subscriptionId"]
     }
 
     // ! THE ORDER OF THE ARGUMENTS MUST BE THE SAME OF THE CONTRACT'S CONSTRUCTOR!!!
@@ -36,7 +37,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
         from: deployer,
         args: arguments,
         log: true,
-        waitConfirmations: network.config.blockConfirmations || 1,
+        waitConfirmations: network.config.blockConfirmations || 3,
     })
 
     // Ensure the Lottery contract is a valid consumer of the VRFCoordinatorV2Mock contract.
@@ -48,7 +49,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     // Verify the deployment
     if (!developmentChains.includes(network.name) && process.env.ETHERSCAN_API_KEY) {
         log("Verifying...")
-        await verify(lottery.address, args)
+        await verify(lottery.address, arguments)
     }
     log("----------------------------------------------------------------")
 }

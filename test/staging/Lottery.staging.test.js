@@ -13,10 +13,10 @@ developmentChains.includes(network.name)
               lotteryEntranceFee = await lottery.getEntranceFee()
           })
 
-          describe("fulfillRandomWorkds", async () => {
+          describe("fulfillRandomWords", async () => {
               it("works with live Chainlink Keepers and Chainlink VRF, we get a random winner", async () => {
                   // enter the lottery
-                  const startingTimeStamp = await lottery.getLatestTimestamp()
+                  const startingTimeStamp = await lottery.getLatestTimeStamp()
                   const accounts = await ethers.provider.getSigner()
                   // setup the listener before we enter the lottery
                   // Just in case the blockchain moves REALLY fast
@@ -28,7 +28,7 @@ developmentChains.includes(network.name)
                               const recentWinner = await lottery.getRecentWinner()
                               const lotteryState = await lottery.getLotteryState()
                               const winnerEndingBalance = await accounts[0].getBalance()
-                              const endingTimeStamp = await lottery.getLatestTimestamp()
+                              const endingTimeStamp = await lottery.getLatestTimeStamp()
                               //   add our asserts here
                               //   assert.equal(numPlayers.toString(), "0")
                               await expect(lottery.getPlayer(0)).to.be.reverted

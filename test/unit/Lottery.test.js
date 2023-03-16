@@ -133,5 +133,57 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
                       vrfCoordinatorV2Mock.fulfillRandomWords(1, lottery.address)
                   ).to.be.revertedWith("nonexistent request")
               })
+              // Wayyyyyyy to big
+              it("picks a winner, resets the lottery, and sends money", async () => {
+                  const additionalEntrants = 3
+                  const startingAccountIndex = 1 // deployer = 0
+                  const accounts = await ethers.getSigners()
+                  for (
+                      let i = startingAccountIndex;
+                      i < startingAccountIndex + additionalEntrants;
+                      i++
+                  ) {
+                      const accountConnectedLottery = lottery.connect(accounts[i])
+                      await accountConnectedLottery.enterLottery({ value: lotteryEntranceFee })
+                  }
+                  const startingTimeStamp = await lottery.getLastTimeStamp()
+
+                  // performUpkeep() (mock being chainlink keepers)
+                  // fulfillRandomWords (mock being the Chainlink VRF)
+                  // We will have to wait for the fulfillRandomWords to be called (so its event emitted)
+                  await new Promise(async (resolve, reject) => {
+                      // Setting up the listener
+                      lottery.once("WinnerPicked", async () => {
+                          console.log("Found the event!")
+                          try {
+                            console.log(recentWinner)
+                            console.log(accounts[2])
+                            console.log(accounts[0])
+                            console.log(accounts[1])
+                            console.log(accounts[3])
+                            const recentWinner = await lottery.getRecentWinner()
+                            const lotteryState = await lottery.getLotteryState()
+                            const endingTimeStamp = await lottery.getLastTimeStamp()
+                            const numPlayers = await lottery.getNumberOfPlayers()
+                            assert.equal(numPlayers.toString(), "0")
+                            assert.equal(raffleState.toString(), "0")
+                            assert(endingTimeStamp > startingTimeStamp)
+                          } catch (error) {
+                              // added in hardhat.config the mocha{timeout:200000} param -> if not resolved in 200s
+                              // the promise will be considered rejected
+                              reject(error)
+                          }
+                          resolve()
+                      })
+                      // below, we will fire the event, and the listener will pick it up, and resolve
+                      const tx = await lottery.performUpkeep("0x")
+                      const txReceipt = await tx.wait(1)
+                      // This function should emit "WinnerPicked" event, and resolve the promise
+                      await vrfCoordinatorV2Mock.fulfillRandomWords(
+                          txReceipt.events[1].args.requestId,
+                          lottery.address
+                      )
+                  })
+              })
           })
       })

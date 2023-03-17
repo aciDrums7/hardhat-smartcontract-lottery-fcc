@@ -21,7 +21,6 @@
     "compile": "yarn hardhat compile"
   },
   "dependencies": {
-    "global": "^4.4.0",
-    "hardhat-shorthand": "^1.0.0"
+    "global": "^4.4.0"
   }
 }

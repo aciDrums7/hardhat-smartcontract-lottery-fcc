@@ -1,7 +1,7 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/javascript-node
 {
-	"name": "Hardhat Smart Contract Lottery - fcc",
+	"name": "Hardhat Smart Contract Lottery fCC",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
 	"image": "mcr.microsoft.com/devcontainers/javascript-node:0-18-bullseye",
   
@@ -23,20 +23,21 @@
 			"christian-kohler.path-intellisense",
 			"esbenp.prettier-vscode",
 			"TabNine.tabnine-vscode",
-			"kisstkondoros.typelens"
+			"kisstkondoros.typelens",
+			"oderwat.indent-rainbow"
 		]
 	  }
 	},
   
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	// "forwardPorts": [3000],
+	"forwardPorts": [8545],
   
 	// Use 'portsAttributes' to set default properties for specific forwarded ports.
 	// More info: https://containers.dev/implementors/json_reference/#port-attributes
 	"portsAttributes": {
-	  "9000": {
-		"label": "Hello Remote World",
-		"onAutoForward": "notify"
+	  "8545": {
+		"label": "Hardhat Smart Contract Lottery fCC",
+		"onAutoForward": "silent"
 	  }
 	},
   

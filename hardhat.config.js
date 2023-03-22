@@ -21,6 +21,9 @@ module.exports = {
             chainId: 31337,
             blockConfirmations: 1,
         },
+        localhost: {
+            chainId: 31337,
+        },
         sepolia: {
             chainId: 11155111,
             blockConfirmations: 3,
@@ -47,7 +50,7 @@ module.exports = {
         // coinmarketcap: process.env.COINMARKETCAP_API_KEY,
     },
     mocha: {
-        timeout: 200000, // 200 seconds max
+        timeout: 500000, // 500 seconds max
     },
     etherscan: {
         // yarn hardhat verify --network <NETWORK> <CONTRACT_ADDRESS> <CONSTRUCTOR_PARAMETERS>

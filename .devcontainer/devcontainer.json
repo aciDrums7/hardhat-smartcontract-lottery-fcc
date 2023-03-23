@@ -23,7 +23,8 @@
 			"esbenp.prettier-vscode",
 			"TabNine.tabnine-vscode",
 			"kisstkondoros.typelens",
-			"oderwat.indent-rainbow"
+			"oderwat.indent-rainbow",
+			"jasonnutter.search-node-modules"
 		]
 	  }
 	},
@@ -41,7 +42,7 @@
 	},
   
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "yarn install"
+	"postCreateCommand": "yarn install && npm install -g hardhat-shorthand"
   
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
 	// "remoteUser": "root"
